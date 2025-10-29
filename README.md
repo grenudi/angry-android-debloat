@@ -8,9 +8,9 @@ Removes **EVERYTHING** non-essential:
 - ❌ All MIUI apps (Gallery, Security, Backup, Cleaner, etc.)
 - ❌ All Google apps (Play Store, Gmail, Chrome, GMS, etc.)
 - ❌ All Qualcomm bloat (Diagnostics, telemetry, etc.)
-- ❌ Browser, Camera, Calendar, Clock, Email
+- ❌ Browser, Calendar, Clock, Email
 - ❌ Both Google keyboards (install yours first!)
-- ✅ **Keeps:** Telephony, 4G/LTE, Calls, SMS, Bluetooth, NFC, System UI
+- ✅ **Keeps:** Camera, Telephony, 4G/LTE, Calls, SMS, Bluetooth, NFC, System UI
 
 ## 🎯 Prerequisites
 
@@ -18,10 +18,10 @@ Removes **EVERYTHING** non-essential:
 
 1. **Install your replacements from F-Droid:**
    - ✅ Keyboard (Unexpected Keyboard, AnySoftKeyboard)
-   - ✅ Camera (OpenCamera, Simple Camera)
    - ✅ Gallery (Simple Gallery Pro)
    - ✅ Browser (Fennec F-Droid, Bromite)
    - ✅ Any other apps you need
+   - ⚠️ Camera is kept by default (edit script to remove if needed)
 
 2. **Enable USB Debugging:**
    ```
@@ -70,12 +70,19 @@ These packages are **NOT** removed to prevent system crashes:
 | `com.android.mms` | MMS messaging |
 | `com.android.defcontainer` | Package installation |
 | `com.android.keychain` | Certificate management |
+| `com.android.camera`* | Camera app (can remove) |
 | `com.qualcomm.qti.ims`* | VoLTE (can remove) |
 | `org.codeaurora.ims`* | VoLTE (can remove) |
 
-\* VoLTE packages are commented in script - uncomment to remove if not needed
+\* Optional packages - commented or can be removed if not needed
 
 ## ⚠️ Important Notes
+
+### Camera
+Stock camera is **kept by default**. To remove it (if you have OpenCamera/etc), edit script and uncomment:
+```bash
+adb shell pm uninstall -k --user 0 com.android.camera
+```
 
 ### VoLTE/VoWiFi
 If you **don't use** VoLTE or VoWiFi calling, edit the script and uncomment these lines:
@@ -108,11 +115,11 @@ adb shell cmd package install-existing com.package.name
 
 Examples:
 ```bash
-# Restore camera
-adb shell cmd package install-existing com.android.camera
-
 # Restore Google Play Store
 adb shell cmd package install-existing com.android.vending
+
+# Restore stock camera (if you removed it)
+adb shell cmd package install-existing com.android.camera
 
 # Restore MIUI Gallery
 adb shell cmd package install-existing com.miui.gallery
