@@ -1,197 +1,207 @@
-# 🔥 FOSSify Android
+# Craft FOSSifier
 
-**Aggressive Android debloat tool** - Remove 200+ vendor bloat packages with bootloop protection.
+**Android Debloat Tool v2.0** - Generate portable debloat scripts for Android devices.
 
-**Especially optimized for Xiaomi/MIUI devices** - Tested on Mi 5, Redmi, and POCO phones. Should work on other Android vendors too (Samsung, Oppo, Realme, etc.) but Xiaomi-specific dangerous packages are well-documented.
+Written in Nim for maximum performance and minimal dependencies.
 
-## TL;DR (if your device is in the list)
-1. Look at the folder structure for your device name/codename
-2. 
-## 🚀 Quick Start 
+## Features
 
-### 1. Install ADB
-**Windows users:** Install [Fedora](https://fedoraproject.org/) (seriously, Windows sucks for development).  
-**Everyone else:** You already know how.
+- ✅ **Portable Output**: Generates OS-agnostic `debloat.txt` and `restore.txt` files
+- 📊 **Organized by Risk**: 10 sections from safest (ads/telemetry) to most dangerous (Google Services)
+- 🛡️ **Bootloop Protection**: Risk profiles prevent dangerous removals on Xiaomi/MIUI devices
+- 🎯 **Interactive Debug Mode**: Build device-specific profiles by testing packages one-by-one
+- 📝 **Self-Documenting**: Each section has detailed headers explaining risks and alternatives
+- 🚀 **No Runtime Dependencies**: Generated files work with just ADB on any OS
 
-### 2. Enable USB Debugging
-```
-Settings → About Phone → Tap "MIUI Version" 7 times
-Settings → Additional Settings → Developer Options → USB Debugging ON
-```
+## Installation
 
-### 3. Connect Phone
-```bash
-adb devices
-# Accept prompt on phone
-```
+### Prerequisites
+- Nim compiler (>= 1.6.0)
+- ADB in PATH (only for execution modes)
 
-### 4. Check Status (Dry Run)
-```bash
-python3 debloat.py --dryrun
-```
-
-### 5. Remove Bloat
-```bash
-# Normal mode - keeps Play Store, removes 190+ packages
-python3 debloat.py --debloat
-
-# FULL DEGOOGLE - removes Play Store/GMS too (195+ packages)
-python3 debloat.py --fulldebloatdegoogle
-```
-
-### 6. Reboot
-```bash
-adb reboot
-```
-
-## 📦 What Gets Removed
-
-### Both Modes Remove:
-- ✓ **Ads & Tracking** - Analytics, vendor stores, GetApps
-- ✓ **Vendor Bloat** - Cloud services, vendor accounts, payment apps
-- ✓ **Vendor "Security"** - Cleaner, Security extras (NOT main Security Center on Xiaomi - causes bootloop!)
-- ✓ **Stock Apps** - **Gallery (has ads!), File Manager (has ads!), Browser**
-- ✓ **Google Bloat** - Gmail, Chrome, YouTube, Maps, Drive, Keyboards
-- ✓ **Qualcomm Junk** - Telemetry, diagnostics, samples
-- ✓ **Carrier Crap** - Cell broadcast, SMS push, configs
-- ✓ **System Apps** - Calendar, Clock, Email, Calculator, Notes, Weather
-- ✓ **Useless Shit** - VR, translations, themes, wallpapers
-
-### --fulldebloatdegoogle ALSO Removes:
-- ✓ **Play Store**
-- ✓ **Google Play Services (GMS)**
-- ✓ **Google Services Framework**
-- ✓ **WebView**
-
-⚠️ **Banking apps, Google Maps, and many games will NOT work without GMS!**
-
-### Always Kept (Critical):
-- ✓ SystemUI, Settings, Phone, Contacts
-- ✓ Telephony (calls/SMS/4G/LTE/VoLTE)
-- ✓ Bluetooth, NFC
-- ✓ Camera, Launcher (safe to remove if you have replacements)
-
-### Auto-Skipped (Will Cause Bootloop on Xiaomi/MIUI):
-- ⊗ com.miui.securitycenter - **WILL BRICK XIAOMI PHONES**
-- ⊗ com.miui.powerkeeper - May cause bootloop on Xiaomi
-- ⊗ com.xiaomi.finddevice - Bootloop on MIUI 12.1+
-- ⊗ com.miui.core - System instability on Xiaomi
-
-*Note: These are Xiaomi-specific. Other vendors may have different dangerous packages.*
-
-## 🛡️ Install FOSS Replacements
-
-**BEFORE removing stock apps**, install these from F-Droid:
-
-### Essential:
-```bash
-# Run the FOSS installer script
-./install-foss.sh
-```
-
-Or manually install:
-- **F-Droid** - https://f-droid.org
-- **Fossify Gallery** - Replace Gallery
-- **Material Files** - Replace File Manager
-- **Ironfox FFUpdater** - Replace Browser
-- **Tor Alfa FFUpdater** - Replace Browser
-- **Unexpected Keyboard** - Replace Gboard (the best keyboard on touchscreen)
-
-### Full List Auto-Installed:
-- F-Droid, FFUpdater, Fennec
-- Fossify (Gallery, Files, Notes, Messages, Phone, Calendar, Clock)
-- Material Files
-- KeePassDX (passwords)
-- Orbot + Tor Browser
-- NewPipe (to download from YouTube, to watch with your account auth just use firefox based browser(add extensions for ad,sponsor block, play in background and so on))
-- MuPDF (PDF reader)
-
-## 🔧 Commands
+### Build from source
 
 ```bash
-# Check what's installed (safe, no changes)
-python3 debloat.py --dryrun
-
-# Remove bloat, keep Play Store
-python3 debloat.py --debloat
-
-# Remove EVERYTHING including Google Services
-python3 debloat.py --fulldebloatdegoogle
-
-# Undo everything
-python3 debloat.py --restore
-
-# Reboot
-adb reboot
-
-# Restore single package
-adb shell cmd package install-existing com.package.name
+git clone https://github.com/username/craft-fossifier
+cd craft-fossifier
+nimble build
 ```
 
-## ❓ FAQ
+This creates a single `craft_fossifier` binary.
 
-**Q: Will this brick my phone?**  
-A: No. Dangerous packages are auto-skipped. Tested on multiple devices. (but maybe)
+## Usage
 
-**Q: Can I undo this?**  
-A: Yes. `python3 debloat.py --restore` or restore individual packages with ADB.
+### Quick Start
 
-**Q: What's the difference between --debloat and --fulldebloatdegoogle?**  
-A: --debloat keeps Play Store/GMS (most apps work). --fulldebloatdegoogle removes them too (full FOSS, some apps won't work).
+```bash
+# 1. Preview what would be removed (safe, no device needed)
+./craft_fossifier --dryrun --leave-risky-to-remove-for xiaomi miui googleservices
 
-**Q: Stock Gallery/FileManager have ADS?**  
-A: YES on Xiaomi/MIUI! Even "system" apps show ads. Other vendors may vary. Always replace with Fossify Gallery and Material Files.
+# 2. Generate portable debloat files (RECOMMENDED)
+./craft_fossifier --generate --leave-risky-to-remove-for xiaomi miui googleservices
 
-**Q: Will calls/SMS/mobile data work?**  
-A: Yes. All telephony packages are preserved on all devices.
+# 3. Review debloat.txt, then copy-paste commands to terminal with ADB
+cat debloat.txt
+# Copy commands section by section
+```
 
-**Q: What if I need Play Store after degoogle?**  
-A: Use Aurora Store (anonymous Play Store client) from F-Droid. Or restore PlayStore as showed above.
+### Modes
 
-**Q: Phone won't boot?**  
-A: Xiaomi-specific dangerous packages are auto-skipped. Other vendors might have different risky packages. If bootloop occurs, factory reset or restore in recovery.
+| Mode | Description | Device Required |
+|------|-------------|-----------------|
+| `--dryrun` | Preview what would be removed | No |
+| `--generate` | Generate debloat.txt and restore.txt | No |
+| `--debloat` | Generate files AND execute removal | Yes |
+| `--restore` | Restore all removed packages | Yes |
+| `--debuginteractive` | Build device profile interactively | Yes |
 
-**Q: Does this work on Samsung/Oppo/Realme/etc?**  
-A: Should work, but dangerous package list is Xiaomi-specific. 
-Use --dryrun first and research your vendor's critical packages before debloating.
-Fork add packages, pull requst is welcomed 
+### Risk Profiles
 
-## 🎯 Recommended Workflow
+Protect your device by skipping risky packages:
 
-1. **Backup your data** (just in case)
-2. `python3 debloat.py --dryrun` (check status)
-3. TODO in py: `./install-foss.sh` (install FOSS apps FIRST) 
-4. Test FOSS apps work
-5. `python3 debloat.py --debloat` (or --fulldebloatdegoogle)
-6. `adb reboot`
-7. Set default apps (Fossify Gallery, Material Files, Fennec)
-8. Enjoy ad-free MIUI
+- `xiaomi` - Xiaomi-specific packages (bootloop risk)
+- `miui` - MIUI ROM packages (system instability)
+- `googleservices` - Apps requiring Google Play Services
+- `custom` - Device-specific (from debug sessions)
+- `core` - Critical system packages (auto-protected)
 
-## 🔥 Pro Tips
+### Examples
 
-- Use **FFUpdater** to install IronFox (hardened Firefox) or Brave(looks shady to me, but you do you)
-- Route all apps through **Tor** with Orbot VPN mode
-- Use **KeePassDX** with Syncthing for password sync
-- Install **OLauncher** or **Lawnchair** to replace vendor launcher
-- **Xiaomi users:** For true privacy, consider **LineageOS** (this script just makes MIUI bearable)
-- **Other vendors:** Check XDA Forums for custom ROM options for your device
+**Safe debloat keeping Google + Xiaomi critical packages:**
+```bash
+./craft_fossifier --generate --leave-risky-to-remove-for xiaomi miui googleservices
+```
 
-## 📱 Tested On
+**Degoogle but keep Xiaomi safe:**
+```bash
+./craft_fossifier --generate --leave-risky-to-remove-for xiaomi miui
+```
 
-**Xiaomi devices (fully tested):**
-- Xiaomi Mi 5 (Gemini) - MIUI Global
-- Should work on all Xiaomi/Redmi/POCO devices with Qualcomm chipsets
-- Android 7.0+
+**Full nuclear option (requires --unsafe):**
+```bash
+./craft_fossifier --generate --unsafe
+```
 
-**Other vendors (should work, use with caution):**
-- Samsung, Oppo, Realme, OnePlus, etc.
-- Run --dryrun first and research vendor-specific dangerous packages
-- Dangerous package list is Xiaomi/MIUI-specific
+**Interactive debug mode (build device profile):**
+```bash
+./craft_fossifier --debuginteractive --leave-risky-to-remove-for xiaomi miui
+```
 
-## 🙏 Credits
+## Output Files
 
-XDA Forums, Reddit r/Xiaomi, F-Droid, Fossify, Guardian Project
+### debloat.txt
+Organized in 10 sections from safest to most dangerous:
 
----
+1. **Absolute Trash** - Ads, telemetry, tracking (✅ Safe)
+2. **Vendor Bloat** - Cloud, accounts, ecosystem (✅ Safe)
+3. **Useless Features** - VR, translation, extras (✅ Safe)
+4. **Vendor Security** - Fake security apps with ads (⚠️ Caution on Xiaomi)
+5. **Qualcomm & Carrier** - Chipset and network bloat (✅ Mostly Safe)
+6. **Stock Vendor Apps** - Gallery, Files, Browser (⚠️ Install FOSS first!)
+7. **Camera & Launcher** - User preference (⚠️ Commented by default)
+8. **Google Bloat** - Gmail, Chrome, YouTube, Maps (⚠️ Moderate)
+9. **Google Play Store** - Play Store only (⚠️ Moderate-High)
+10. **Google Services** - GMS, GSF, WebView (☢️ Nuclear - commented by default)
 
-**⚠️ DISCLAIMER:** Backup your data. Author not responsible for issues. Dangerous package list is Xiaomi/MIUI-specific - other vendors may have different risky packages. This script makes vendor Android less shitty - for real privacy, use a custom ROM.
+Each section includes:
+- Safety level indicator
+- What gets removed
+- Impact description
+- FOSS alternatives
+- Detailed warnings
+
+### restore.txt
+Commands to restore all removed packages, organized by the same sections.
+
+## Debug Interactive Mode
+
+Creates a folder with:
+- `debloat.txt` - Tested safe removal commands
+- `restore.txt` - Restore commands
+- `problematic_packages.txt` - Human-readable problem list
+- Device profile for contribution
+
+**Workflow:**
+1. Removes packages one-by-one
+2. Prompts you to test device after each removal
+3. Automatically restores problematic packages
+4. Generates device-specific profile
+
+## Project Structure
+
+```
+craft_fossifier/
+├── craft_fossifier.nimble    # Package definition
+├── src/
+│   ├── craft_fossifier.nim   # Main entry point
+│   ├── types/
+│   │   ├── enums.nim         # Risk profiles, sections, levels
+│   │   ├── package.nim       # Package type
+│   │   └── config.nim        # Configuration
+│   ├── data/
+│   │   └── all_packages.nim  # Complete package database (~250 packages)
+│   ├── core/
+│   │   ├── adb.nim           # ADB interface
+│   │   └── risk_analyzer.nim # Risk filtering
+│   ├── modes/
+│   │   ├── dryrun.nim
+│   │   ├── generate.nim
+│   │   ├── debloat.nim
+│   │   ├── restore.nim
+│   │   └── debug_interactive.nim
+│   ├── output/
+│   │   ├── section_formatter.nim  # Section headers
+│   │   └── file_generator.nim     # Generate output files
+│   └── ui/
+│       └── colors.nim             # Terminal colors
+```
+
+## Philosophy
+
+**KISS (Keep It Simple, Stupid):**
+- Single binary, no runtime dependencies
+- Generates portable text files that work anywhere
+- Clean, readable code following Nim best practices
+- Self-documenting output with detailed explanations
+
+**Safety First:**
+- Risk profiles prevent bootloops
+- Dangerous packages commented out by default
+- Interactive mode for testing unknowns
+- Always generates restore.txt as backup
+
+**Educational:**
+- Each package has description
+- Sections explain what/why/when
+- FOSS alternatives listed
+- Impact warnings prominent
+
+## Contributing
+
+We welcome device profiles! If you use `--debuginteractive`, please share your device folder:
+
+1. Go to https://github.com/username/craft-fossifier/issues/new
+2. Title: "Device Profile: [Device Name]"
+3. Attach the entire device folder as ZIP
+4. Describe your experience
+
+## License
+
+MIT License - See LICENSE file for details
+
+## Disclaimer
+
+⚠️ **Use at your own risk!** Removing system packages can cause instability or bootloops. Always:
+- Start with `--dryrun` to preview
+- Use risk profiles appropriate for your device
+- Generate files first before executing
+- Keep `restore.txt` as backup
+- Test thoroughly after debloating
+
+The authors are not responsible for any damage to your device.
+
+## Credits
+
+- Inspired by Universal Android Debloater
+- Built with Nim programming language
+- Package database curated from community contributions

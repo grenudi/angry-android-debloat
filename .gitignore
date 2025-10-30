@@ -1,1 +1,14 @@
-/src/tmp
+# Direnv
+.direnv/
+
+# Nix
+result
+result-*
+
+# Nim
+nimcache/
+nimblecache/
+htmldocs/
+
+# vscode
+.vscode/
